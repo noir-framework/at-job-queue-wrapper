@@ -1,19 +1,18 @@
 <?php
 
-namespace Treffynnon\At\Tests;
+declare(strict_types=1);
 
+namespace Noir\At\Tests;
+
+use Noir\At\JobAddException;
 use PHPUnit\Framework\TestCase;
-use Treffynnon\At\JobNotFoundException;
-use Treffynnon\At\Wrapper as At;
+use Noir\At\JobNotFoundException;
+use Noir\At\Wrapper as At;
 
 class WrapperTest extends TestCase
 {
-    /**
-     * The tested file name.
-     *
-     * @var string
-     */
-    protected $test_file = '';
+    /** The tested file name. */
+    protected string $test_file = '';
 
     /**
      * PHPUnit fixtures for setUp.
@@ -29,13 +28,13 @@ class WrapperTest extends TestCase
      * Test that can create a scheduled job with at.
      *
      * @return void
+     * @throws JobAddException
      */
-    public function testAtCmd()
+    public function testAtCmd(): void
     {
         $job = 'echo "hello" | wall';
         $time = 'now + 1min';
         $obj = At::cmd($job, $time);
-        $this->assertInstanceOf('Treffynnon\At\Job', $obj);
         $this->cleanUpJobs($obj);
     }
 
@@ -43,13 +42,13 @@ class WrapperTest extends TestCase
      * Test that can use file to create scheduled job with at.
      *
      * @return void
+     * @throws JobAddException
      */
-    public function testAtFile()
+    public function testAtFile(): void
     {
         $file = $this->test_file;
         $time = 'now + 1min';
         $obj = At::file($file, $time);
-        $this->assertInstanceOf('Treffynnon\At\Job', $obj);
         $this->cleanUpJobs($obj);
     }
 
@@ -57,8 +56,9 @@ class WrapperTest extends TestCase
      * Test that can get the queued job lists with at.
      *
      * @return void
+     * @throws JobAddException
      */
-    public function testAtLq()
+    public function testAtLq(): void
     {
         $this->setDependencies(['testAtFile', 'testAtCmd']);
         $job = 'echo "hello" | wall';
@@ -76,7 +76,7 @@ class WrapperTest extends TestCase
      *
      * @return void
      */
-    public function testRegressionIssue2UsernameRegexDoesntSupportHyphens()
+    public function testRegressionIssue2UsernameRegexDoesntSupportHyphens(): void
     {
         $regex = TestableAtWrapper::getQueueRegex();
         $test_strings = [
@@ -89,13 +89,14 @@ class WrapperTest extends TestCase
         foreach ($test_strings as $test) {
             $m += preg_match($regex, $test);
         }
-        $this->assertSame($m, count($test_strings));
+        $this->assertCount($m, $test_strings);
     }
 
     /**
      * Test that can at cmd can be unescaped.
+     * @throws JobAddException
      */
-    public function testAtCmdCanBeUnescaped()
+    public function testAtCmdCanBeUnescaped(): void
     {
         $job = 'echo "12345" > /tmp/echo.log 2>&1';
         $at = new At();
@@ -122,10 +123,9 @@ class WrapperTest extends TestCase
      * Clean up job lists.
      *
      * @param mixed $jobs The queued job lists
-     *
      * @return void
      */
-    private function cleanUpJobs($jobs)
+    private function cleanUpJobs(mixed $jobs): void
     {
         if (!is_array($jobs)) {
             $jobs = [$jobs];
@@ -133,7 +133,7 @@ class WrapperTest extends TestCase
         foreach ($jobs as $job) {
             try {
                 $job->rem();
-            } catch (JobNotFoundException $e) {
+            } catch (JobNotFoundException) {
             }
         }
     }

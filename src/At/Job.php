@@ -1,23 +1,16 @@
 <?php
 
-namespace Treffynnon\At;
+declare(strict_types=1);
 
-/**
- * A simple class for storing a jobs details and some methods for manipulating
- * it. A job model if you will.
- *
- * @author Simon Holywell <treffynnon@php.net>
- *
- * @version 16.11.2010
- */
+namespace Noir\At;
+
+use DateMalformedStringException;
+use DateTime;
+
 class Job
 {
-    /**
-     * Data store for the job details.
-     *
-     * @var array
-     */
-    protected $data = [];
+    /** Data store for the job details. */
+    protected array $data = [];
 
     /**
      * Magic method to set a value in the $data
@@ -25,10 +18,9 @@ class Job
      *
      * @param string $name The key of data array
      * @param mixed $value The value of data array
-     *
      * @return void
      */
-    public function __set(string $name, $value): void
+    public function __set(string $name, mixed $value): void
     {
         $this->data[$name] = $value;
     }
@@ -38,10 +30,10 @@ class Job
      * of the class.
      *
      * @param string $name The key of data array
-     *
      * @return mixed
+     * @throws UndefinedPropertyException
      */
-    public function __get($name)
+    public function __get(string $name): mixed
     {
         if (isset($this->data[$name])) {
             return $this->data[$name];
@@ -60,10 +52,9 @@ class Job
      * index in the $data property of the class.
      *
      * @param string $name The key of data array
-     *
      * @return bool
      */
-    public function __isset($name): bool
+    public function __isset(string $name): bool
     {
         return isset($this->data[$name]);
     }
@@ -73,10 +64,9 @@ class Job
      * of the class.
      *
      * @param string $name The key of data array
-     *
      * @return void
      */
-    public function __unset($name): void
+    public function __unset(string $name): void
     {
         unset($this->data[$name]);
     }
@@ -84,21 +74,10 @@ class Job
     /**
      * Remove this job from the queue.
      *
-     * @uses $this->remove()
-     *
      * @return void
+     * @throws JobNotFoundException
      */
-    public function rem()
-    {
-        $this->remove();
-    }
-
-    /**
-     * Remove this job from the queue.
-     *
-     * @return void
-     */
-    public function remove()
+    public function remove(): void
     {
         if (isset($this->job_number)) {
             Wrapper::removeJob((int)$this->job_number);
@@ -109,16 +88,16 @@ class Job
      * Get a DateTime object for date and time extracted from
      * the output of `at`.
      *
-     * @example echo $job->date()->format('d-m-Y');
-     *
      * @param string $date The date string
+     * @return DateTime A PHP DateTime object
+     * @throws DateMalformedStringException
+     * @example echo $job->date()->format('d-m-Y');
      *
      * @uses DateTime
      *
-     * @return \DateTime A PHP DateTime object
      */
-    public function date(string $date)
+    public function date(string $date): DateTime
     {
-        return new \DateTime($date);
+        return new DateTime($date);
     }
 }

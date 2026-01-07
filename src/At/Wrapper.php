@@ -1,66 +1,22 @@
 <?php
 
-namespace Treffynnon\At;
+namespace Noir\At;
 
 /**
  * The class that wraps the at binary. It is not feature complete as the
  * native at binary does offer more, but it does contain the commonly used
  * functions and is enough for my purposes.
- *
- * @author Simon Holywell <treffynnon@php.net>
- * @license BSD
  */
 class Wrapper
 {
-    /**
-     * The path to the `at` binary.
-     *
-     * @var string
-     */
-    protected static $binary = 'at';
+    /** The path to the `at` binary. */
+    protected static string $binary = 'at';
 
-    /**
-     * Regular expression to get the details of a job from the add job response.
-     *
-     * @var string
-     */
-    protected static $addRegex = '/^job (\d+) at ([\w\d\- :]+)$/';
+    /** Regex to get the vitals from the queue. */
+    protected static string $queueRegex = '/^(\d+)\s+([\w\d\- :]+) (\w) ([\w-]+)$/';
 
-    /**
-     * A map of the regex matches to their descriptive names.
-     *
-     * @var array
-     */
-    protected static $addMap = [
-        1 => 'job_number',
-        2 => 'date',
-    ];
-
-    /**
-     * Regex to get the vitals from the queue.
-     *
-     * @var string
-     */
-    protected static $queueRegex = '/^(\d+)\s+([\w\d\- :]+) (\w) ([\w-]+)$/';
-
-    /**
-     * A map of the regex matches to their descriptive names.
-     *
-     * @var array
-     */
-    protected static $queueMap = [
-        1 => 'job_number',
-        2 => 'date',
-        3 => 'queue',
-        4 => 'user',
-    ];
-
-    /**
-     * Set escape whether using the escapeshellcmd before add command.
-     *
-     * @var bool
-     */
-    protected static $escape = true;
+    /** Set escape whether using the escapeshellcmd before add command. */
+    protected static bool $escape = true;
 
     /**
      * Location to pipe the output of at commands to.
@@ -72,19 +28,13 @@ class Wrapper
      *
      * Combining the two allows me to use the same pipe command for both types
      * of interaction with `at`. I think it is also the safest way of
-     * accommodating users who do not the have the problem of warning being
+     * accommodating users who do not have the problem of warning being
      * triggered when adding a new job.
-     *
-     * @var string
      */
-    protected static $pipeTo = '2>&1';
+    protected static string $pipeTo = '2>&1';
 
-    /**
-     * Switches/arguments that at uses on the `at` command.
-     *
-     * @var array
-     */
-    protected static $atSwitches = [
+    /** Switches/arguments that at uses on the `at` command. */
+    protected static array $atSwitches = [
         'queue' => '-q',
         'list_queue' => '-l',
         'file' => '-f',
@@ -94,13 +44,12 @@ class Wrapper
     /**
      * @param string $command The current command
      * @param string $time Please see `man at`
-     * @param string $queue Please look at a-zA-Z and see `man at`
-     *
-     * @uses self::addCommand
-     *
+     * @param string|null $queue Please look at a-zA-Z and see `man at`
      * @return Job
+     * @throws JobAddException
+     * @uses self::addCommand
      */
-    public static function cmd($command, $time, $queue = null)
+    public static function cmd(string $command, string $time, ?string $queue = null): Job
     {
         return self::addCommand($command, $time, $queue);
     }
@@ -108,25 +57,22 @@ class Wrapper
     /**
      * @param string $file Full path to the file to be executed
      * @param string $time Please see `man at`
-     * @param string $queue Please look at a-zA-Z and see `man at`
-     *
-     * @uses self::addFile
-     *
+     * @param string|null $queue Please look at a-zA-Z and see `man at`
      * @return Job
+     * @throws JobAddException
+     * @uses self::addFile
      */
-    public static function file($file, $time, $queue = null)
+    public static function file(string $file, string $time, ?string $queue = null): Job
     {
         return self::addFile($file, $time, $queue);
     }
 
     /**
-     * @param string $queue Please look at a-zA-Z and see `man at`
-     *
-     * @uses self::listQueue
-     *
+     * @param string|null $queue Please look at a-zA-Z and see `man at`
      * @return array
+     * @uses self::listQueue
      */
-    public static function lq($queue = null)
+    public static function lq(?string $queue = null): array
     {
         return self::listQueue($queue);
     }
@@ -135,10 +81,9 @@ class Wrapper
      * Set escape param.
      *
      * @param bool $escape The escaped command
-     *
      * @return self
      */
-    public function setEscape($escape)
+    public function setEscape(bool $escape): self
     {
         self::$escape = $escape;
 
@@ -146,25 +91,15 @@ class Wrapper
     }
 
     /**
-     * Get escape param.
-     *
-     * @return bool
-     */
-    public static function getEscape()
-    {
-        return self::$escape;
-    }
-
-    /**
      * Add a job to the `at` queue.
      *
      * @param string $command The current command
      * @param string $time Please see `man at`
-     * @param string $queue Please look at a-zA-Z and see `man at`
-     *
+     * @param string|null $queue Please look at a-zA-Z and see `man at`
      * @return Job
+     * @throws JobAddException
      */
-    public static function addCommand($command, $time, $queue = null)
+    public static function addCommand(string $command, string $time, ?string $queue = null): Job
     {
         if (true === self::$escape) {
             $command = self::escape($command);
@@ -172,7 +107,7 @@ class Wrapper
         }
         $exec_string = "echo '$command' | " . self::$binary;
         if (null !== $queue) {
-            $exec_string .= ' ' . self::$atSwitches['queue'] . " {$queue[0]}";
+            $exec_string .= ' ' . self::$atSwitches['queue'] . " $queue[0]";
         }
         $exec_string .= " $time ";
 
@@ -184,11 +119,11 @@ class Wrapper
      *
      * @param string $file Full path to the file to be executed
      * @param string $time Please see `man at`
-     * @param string $queue Please look at a-zA-Z and see `man at`
-     *
+     * @param string|null $queue Please look at a-zA-Z and see `man at`
      * @return Job
+     * @throws JobAddException
      */
-    public static function addFile($file, $time, $queue = null)
+    public static function addFile(string $file, string $time, ?string $queue = null): Job
     {
         if (true === self::$escape) {
             $file = self::escape($file);
@@ -196,7 +131,7 @@ class Wrapper
         }
         $exec_string = self::$binary . ' ' . self::$atSwitches['file'] . " $file";
         if (null !== $queue) {
-            $exec_string .= ' ' . self::$atSwitches['queue'] . " {$queue[0]}";
+            $exec_string .= ' ' . self::$atSwitches['queue'] . " $queue[0]";
         }
         $exec_string .= " $time ";
 
@@ -207,15 +142,14 @@ class Wrapper
      * Return a list of the jobs currently in the queue. If you do not specify
      * a queue to look at then it will return all jobs in all queues.
      *
-     * @param string $queue Please look at a-zA-Z and see `man at`
-     *
+     * @param string|null $queue Please look at a-zA-Z and see `man at`
      * @return array
      */
-    public static function listQueue($queue = null)
+    public static function listQueue(?string $queue = null): array
     {
         $exec_string = self::$binary . ' ' . self::$atSwitches['list_queue'];
         if (null !== $queue) {
-            $exec_string .= ' ' . self::$atSwitches['queue'] . " {$queue[0]}";
+            $exec_string .= ' ' . self::$atSwitches['queue'] . " $queue[0]";
         }
         $result = self::exec($exec_string);
 
@@ -225,11 +159,11 @@ class Wrapper
     /**
      * Remove a job by job number.
      *
-     * @param int $job_number The current job number
-     *
+     * @param int|string $job_number The current job number
      * @return void
+     * @throws JobNotFoundException
      */
-    public static function removeJob($job_number)
+    public static function removeJob(int|string $job_number): void
     {
         if (true === self::$escape) {
             $job_number = self::escape((string)$job_number);
@@ -242,13 +176,13 @@ class Wrapper
     }
 
     /**
-     * Add a job to the at queue and return the.
+     * Add a job to the at queue and return.
      *
      * @param string $job_exec_string The job execution string
-     *
      * @return Job
+     * @throws JobAddException
      */
-    protected static function addJob($job_exec_string)
+    protected static function addJob(string $job_exec_string): Job
     {
         $output = self::exec($job_exec_string);
         $job = self::transform($output);
@@ -266,12 +200,10 @@ class Wrapper
      *
      * @param array $output_array The output with array
      * @param string $type Is this an add or list we are transforming?
-     *
-     * @return array An array of Treffynnon\At\Job objects
-     *
-     * @uses Treffynnon\At\Job
+     * @return Job[]
+     * @uses Job
      */
-    protected static function transform($output_array, $type = 'add')
+    protected static function transform(array $output_array, string $type = 'add'): array
     {
         $jobs = [];
 
@@ -296,14 +228,13 @@ class Wrapper
 
     /**
      * Map the details matched with the regex to descriptively named properties
-     * in a new Treffynnon\At\Job object.
+     * in a new Job object.
      *
      * @param array $details The details about job description
      * @param array $map The mapped job array
-     *
      * @return Job
      */
-    protected static function mapJob($details, $map)
+    protected static function mapJob(array $details, array $map): Job
     {
         $Job = new Job();
         foreach ($details as $key => $detail) {
@@ -319,10 +250,9 @@ class Wrapper
      * Escape a string that will be passed to exec.
      *
      * @param string $string The executed command
-     *
      * @return string
      */
-    protected static function escape($string)
+    protected static function escape(string $string): string
     {
         return escapeshellcmd($string);
     }
@@ -332,10 +262,9 @@ class Wrapper
      * array.
      *
      * @param string $string The executed string
-     *
-     * @return array Each line of output is an element in the array
+     * @return string[] Each line of output is an element in the array
      */
-    protected static function exec($string)
+    protected static function exec(string $string): array
     {
         $output = [];
         $string .= ' ' . self::$pipeTo;

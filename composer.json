@@ -3,32 +3,32 @@
     "type": "library",
     "description": "A PHP wrapper for the unix `at` queue",
     "keywords": ["queue","job queue","at","linux"],
-    "homepage": "http://github.com/treffynnon/PHP-at-Job-Queue-Wrapper",
+    "homepage": "https://github.com/noir-framework/at-job-queue-wrapper",
     "license": "BSD-2-Clause",
     "authors": [
         {
-            "name": "Simon Holywell",
-            "email": "treffynnon@php.net",
-            "homepage": "http://simonholywell.com"
+            "name": "deba12",
+            "email": "int986@gmail.com",
+            "homepage": "https://github.com/noir-framework"
         }
     ],
     "require": {
-        "php": ">=7.2"
+        "php": "^8.4"
     },
     "require-dev": {
-        "phpunit/phpunit": "^8.0",
-        "phpstan/phpstan": "^0.12",
-        "squizlabs/php_codesniffer": "^3.4",
-        "friendsofphp/php-cs-fixer": "^2.16"
+        "phpunit/phpunit": "^12",
+        "squizlabs/php_codesniffer": "4.0.0beta1",
+        "phpstan/phpstan": "^2.1",
+        "vimeo/psalm": "7.0.0-beta10"
     },
     "autoload": {
         "psr-4": {
-            "Treffynnon\\At\\": "lib/Treffynnon/At"
+            "Noir\\At\\": "src/At"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Treffynnon\\At\\Tests\\": "tests/Treffynnon/At"
+            "Noir\\At\\Tests\\": "tests/At"
         }
     },
     "scripts": {

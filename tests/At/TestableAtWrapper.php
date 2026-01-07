@@ -1,15 +1,17 @@
 <?php
 
-namespace Treffynnon\At\Tests;
+declare(strict_types=1);
 
-use Treffynnon\At\Wrapper as At;
+namespace Noir\At\Tests;
+
+use Noir\At\Wrapper as At;
 
 class TestableAtWrapper extends At
 {
     /**
      * @return string
      */
-    public static function getQueueRegex()
+    public static function getQueueRegex(): string
     {
         return static::$queueRegex;
     }

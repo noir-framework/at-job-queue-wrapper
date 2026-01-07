@@ -1,4 +1,5 @@
 parameters:
-	reportUnmatchedIgnoredErrors: false
-	checkMissingIterableValueType: false
-	checkGenericClassInNonGenericObjectType: false
+	level: 2
+	ignoreErrors:
+	paths:
+		- src
