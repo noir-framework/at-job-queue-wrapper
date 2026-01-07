@@ -1,5 +1,5 @@
 {
-    "name": "treffynnon/php-at-job-queue-wrapper",
+    "name": "noir/php-at-job-queue-wrapper",
     "type": "library",
     "description": "A PHP wrapper for the unix `at` queue",
     "keywords": ["queue","job queue","at","linux"],
