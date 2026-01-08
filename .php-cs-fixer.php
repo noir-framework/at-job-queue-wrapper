@@ -7,22 +7,16 @@
 
 declare(strict_types=1);
 
-/**
- * @noinspection TransitiveDependenciesUsageInspection
- * @noinspection DevelopmentDependenciesUsageInspection
- */
-
 $finder = Symfony\Component\Finder\Finder::create()
     ->in([
-        __DIR__ . '/app',
+        __DIR__ . '/src',
     ])
     ->name('*.php')
     ->notName('*.blade.php')
     ->ignoreDotFiles(true)
     ->ignoreVCS(true);
 
-/** @noinspection DevelopmentDependenciesUsageInspection */
-return (new PhpCsFixer\Config())->setRules([
+return new PhpCsFixer\Config()->setRules([
     '@PSR2'                             => true,
     'array_syntax'                      => ['syntax' => 'short'],
     'ordered_imports'                   => ['sort_algorithm' => 'alpha'],

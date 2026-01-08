@@ -2,3 +2,4 @@
 /composer.lock
 build/
 .idea/
+.php-cs-fixer.cache
