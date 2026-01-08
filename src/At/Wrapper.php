@@ -10,7 +10,7 @@ namespace Noir\At;
 class Wrapper
 {
     /** The path to the `at` binary. */
-    protected static string $binary = 'at';
+    protected static string $binary = '/usr/bin/at';
 
     /** Regex to get the vitals from the queue. */
     protected static string $queueRegex = '/^(\d+)\s+([\w\d\- :]+) (\w) ([\w-]+)$/';
