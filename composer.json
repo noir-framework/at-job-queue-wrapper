@@ -5,6 +5,7 @@
     "keywords": ["queue","job queue","at","linux"],
     "homepage": "https://github.com/noir-framework/at-job-queue-wrapper",
     "license": "BSD-2-Clause",
+    "version": "2.0.1",
     "authors": [
         {
             "name": "deba12",
